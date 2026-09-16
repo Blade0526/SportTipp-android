@@ -293,7 +293,7 @@ class SportTippRepository {
         lista: List<NyersMeccs>
     ): Int {
 
-        return lista.sumOf { m ->
+        return lista.fold(0) { osszeg, m ->
 
             val sajat =
                 csapatGol(csapat, m)
@@ -301,7 +301,7 @@ class SportTippRepository {
             val ellenfel =
                 ellenfelGol(csapat, m)
 
-            when {
+            osszeg + when {
                 sajat > ellenfel -> 3
                 sajat == ellenfel -> 1
                 else -> 0
