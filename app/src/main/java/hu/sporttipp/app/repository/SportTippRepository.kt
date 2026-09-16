@@ -29,6 +29,17 @@ class SportTippRepository {
         val radar = ForrasRadar.keres()
         val ma = LocalDate.now(java.time.ZoneId.of("Europe/Budapest")).toString()
 
+        println("SPORTTIPP DEBUG === MA: $ma")
+        println("SPORTTIPP DEBUG === ÖSSZES: ${radar.meccsek.size}")
+        println("SPORTTIPP DEBUG === DÁTUMOK:")
+        radar.meccsek
+            .groupingBy { it.datum }
+            .eachCount()
+            .toList()
+            .sortedByDescending { it.second }
+            .take(30)
+            .forEach { println("SPORTTIPP DEBUG === '${it.first}' -> ${it.second}") }
+
         val lezart = radar.meccsek.filter {
             it.hazaiGol != null &&
             it.vendegGol != null &&
