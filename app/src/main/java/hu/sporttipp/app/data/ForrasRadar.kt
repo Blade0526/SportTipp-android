@@ -128,21 +128,55 @@ class FootballDataAdapter(
     }
 
     private fun datumIso(value: String): String? {
+        val raw = value.trim()
+        if (raw.isBlank()) return null
 
-        val p = value.trim().split("/")
+        val tiszta = raw
+            .substringBefore("T")
+            .substringBefore(" ")
+            .trim()
 
-        if (p.size != 3) return null
+        val mintak = listOf(
+            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE,
+            java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy"),
+            java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"),
+            java.time.format.DateTimeFormatter.ofPattern("d.M.yyyy"),
+            java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+            java.time.format.DateTimeFormatter.ofPattern("d-M-yyyy")
+        )
 
-        val nap = p[0].toIntOrNull() ?: return null
-        val honap = p[1].toIntOrNull() ?: return null
+        for (minta in mintak) {
+            try {
+                return java.time.LocalDate.parse(tiszta, minta).toString()
+            } catch (_: Exception) {
+            }
+        }
 
-        var ev = p[2].toIntOrNull() ?: return null
+        val szamok = Regex("""\d+""")
+            .findAll(raw)
+            .map { it.value.toIntOrNull() }
+            .filterNotNull()
+            .toList()
 
-        if (ev < 100) ev += 2000
+        if (szamok.size >= 3) {
+            try {
+                val (ev, honap, nap) =
+                    if (szamok[0] >= 1900) {
+                        Triple(szamok[0], szamok[1], szamok[2])
+                    } else if (szamok[2] >= 1900) {
+                        Triple(szamok[2], szamok[1], szamok[0])
+                    } else {
+                        return null
+                    }
 
-        return runCatching {
-            LocalDate.of(ev, honap, nap).toString()
-        }.getOrNull()
+                return java.time.LocalDate.of(ev, honap, nap).toString()
+            } catch (_: Exception) {
+            }
+        }
+
+        return null
     }
 
     private fun csv(line: String): List<String> {

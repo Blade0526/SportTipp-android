@@ -27,7 +27,7 @@ class SportTippRepository {
     suspend fun keres(): KeresesiEredmeny {
 
         val radar = ForrasRadar.keres()
-        val ma = LocalDate.now().toString()
+        val ma = LocalDate.now(java.time.ZoneId.of("Europe/Budapest")).toString()
 
         val lezart = radar.meccsek.filter {
             it.hazaiGol != null &&
